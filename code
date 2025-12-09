@@ -1,6 +1,6 @@
-library(tidyverse)
-library(ggplot2)
-library(broom)
+tidyverse
+ggplot2
+broom
 
 # Generate Synthetic Dataset
 
