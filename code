@@ -1,0 +1,62 @@
+library(tidyverse)
+library(ggplot2)
+library(broom)
+
+# Generate Synthetic Dataset
+
+set.seed(42)
+
+n <- 200
+
+df <- tibble(
+  Experience = rnorm(n, mean = 5, sd = 2),          # years of experience
+  TrainingHours = rnorm(n, mean = 20, sd = 5),      # training per month
+  Productivity = 30 +
+    3 * Experience +
+    1.2 * TrainingHours +
+    rnorm(n, mean = 0, sd = 8)                      # noise
+)
+
+# no negative values
+df <- df %>%
+  mutate(
+    Experience = ifelse(Experience < 0, 0, Experience),
+    TrainingHours = ifelse(TrainingHours < 0, 0, TrainingHours)
+  )
+
+# Save dataset
+if (!dir.exists("data")) dir.create("data")
+write_csv(df, "data/synthetic_data.csv")
+
+# Exploratory Data Analysis (EDA)
+
+print("Dataset Preview:")
+print(head(df))
+
+ggplot(df, aes(x = Experience, y = Productivity)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Productivity vs Experience",
+       x = "Experience (years)",
+       y = "Productivity Score")
+
+# Linear Regression Model
+
+model <- lm(Productivity ~ Experience + TrainingHours, data = df)
+
+print(summary(model))
+
+tidy_model <- tidy(model)
+print(tidy_model)
+
+# Diagnostic Plots
+
+par(mfrow = c(2, 2))
+plot(model)
+par(mfrow = c(1, 1))
+
+# Save Model Results 
+
+write_csv(tidy_model, "data/model_summary.csv")
+print("Analysis complete. Outputs saved to /data.")
+
